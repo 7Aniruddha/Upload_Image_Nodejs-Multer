@@ -56,7 +56,7 @@ app.use(express.urlencoded({
   extended: true
 }));
 
-app.post("/login.html", (req, res) => {
+app.post("/", (req, res) => {
   console.log(req.body)
   //------------------ (mongodb) ------------------//
   var mongodata = new uschema({
@@ -79,7 +79,7 @@ app.post("/login.html", (req, res) => {
   })
   //------------------ (mongodb) ------------------//
 
-  res.send("done!")
+  res.redirect("http://localhost:3000/login.html")
 })
 
 //---------- (get data from HTML to node server) ----------//
@@ -91,7 +91,12 @@ app.post("/login.html", (req, res) => {
 
 
 //------------------ (JsonWebToken) ------------------//
-var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
+var token = jwt.sign({ foo: 'Sqube' }, 'shhhhh');
+console.log('==>', token)
+
+jwt.verify(token, 'shhhhh', function(err, decoded) {
+  console.log(decoded.foo)
+});
 //------------------ (JsonWebToken) ------------------//
 
 
