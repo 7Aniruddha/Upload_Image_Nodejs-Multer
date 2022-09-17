@@ -62,7 +62,7 @@ const auth = async(req, res, next) => {
     console.log("verifyUser>>",verifyUser)
 
     const user = await uschema.findOne({_id: verifyUser.id})                          
-    console.log(user);
+    console.log("user>>",user);
     next();
 
   }catch (err){
