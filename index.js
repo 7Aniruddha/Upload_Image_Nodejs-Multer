@@ -1,9 +1,12 @@
+require('dotenv').config()
 var express = require('express')
 var multer  = require('multer')
 const mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 var mongo = require("./models/connection")
 var uschema = require("./models/userData.model")
+var cookieParser = require("cookie-parser")
+var hbs = require('hbs')
 
 var port = 3000;
 
@@ -21,6 +24,9 @@ var upload = multer({ storage: storage })
 
 app.use(express.static(__dirname + '/public'));
 app.use('/uploads', express.static('uploads'));
+app.use(cookieParser())
+app.set('view engine', 'hbs')
+
 
 app.post('/profile-upload-single', upload.single('profile-file'), function (req, res, next) {
   // req.file is the `profile-file` file
@@ -46,6 +52,25 @@ app.post('/profile-upload-multiple', upload.array('profile-files', 12), function
 })
 
 
+const auth = async(req, res, next) => {
+  try{
+    console.log("auth is called!")
+    const token_from_cookie = req.cookies.jwt_cookie;
+    console.log("token_from_cookie>>",token_from_cookie);
+    
+    const verifyUser = jwt.verify(token_from_cookie, process.env.SECRET_KEY);
+    console.log("verifyUser>>",verifyUser)
+
+    const user = await uschema.findOne({_id: verifyUser.id})                          
+    console.log(user);
+    next();
+
+  }catch (err){
+    console.log('error in auth')
+    res.status(401).send(err);    
+  }
+}
+
 
 //---------- (get data from HTML to node server) ----------// 
 // app.post("/",upload.none(), (req, res) => {
@@ -57,7 +82,7 @@ app.use(express.urlencoded({
 }));
 
 app.post("/", (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   //------------------ (mongodb) ------------------//
   var mongodata = new uschema({
     name: req.body.username,
@@ -65,10 +90,29 @@ app.post("/", (req, res) => {
     password: req.body.pass  
   });
 
-  // mongodata.save();
+
+  //------------------ (JsonWebToken) ------------------//
+  // console.log('mongodata>>', mongodata._id)
+  var token = jwt.sign({ id: mongodata._id }, process.env.SECRET_KEY);
+  console.log('==>', token)
+
+  jwt.verify(token, process.env.SECRET_KEY, function(err, decoded) {
+    console.log('decoded>>',decoded.id)
+  });
+  //------------------ (JsonWebToken) ------------------//
+
+
+  //--------- (saving the jwt in cookies) ---------//
+  res.cookie("jwt_cookie", token, {
+    expires: new Date(Date.now() + 15000),
+    httpOnly:true
+  })
+
+  // console.log('cookies>>', req.cookies.jwt_cookie)
+  //--------- (saving the jwt in cookies) ---------//
 
   mongodata.save(function(err,result){
-    if (err){
+    if (err){   
       // console.log(err);
       console.log("Error occured while saving data!");
     }
@@ -79,25 +123,16 @@ app.post("/", (req, res) => {
   })
   //------------------ (mongodb) ------------------//
 
-  res.redirect("http://localhost:3000/login.html")
+  res.redirect("http://localhost:3000/up")
 })
 
 //---------- (get data from HTML to node server) ----------//
 
 
 
-
-
-
-
-//------------------ (JsonWebToken) ------------------//
-var token = jwt.sign({ foo: 'Sqube' }, 'shhhhh');
-console.log('==>', token)
-
-jwt.verify(token, 'shhhhh', function(err, decoded) {
-  console.log(decoded.foo)
-});
-//------------------ (JsonWebToken) ------------------//
+app.get('/up',auth,(req, res) => {
+  res.render("upload_pic")
+})
 
 
 
