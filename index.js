@@ -134,7 +134,7 @@ app.get('/up',auth,(req, res) => {
 })
 
 
-app.get('/login',auth,(req, res) => {
+app.get('/login',(req, res) => {
   res.render("login")
   // res.redirect("up")
 })
