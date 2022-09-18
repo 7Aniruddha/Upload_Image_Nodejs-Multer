@@ -22,6 +22,8 @@ var storage = multer.diskStorage({
 })
 var upload = multer({ storage: storage })
 
+var logged_in_user_data;
+
 app.use(express.static(__dirname + '/public'));
 app.use('/uploads', express.static('uploads'));
 app.use(cookieParser())
@@ -47,7 +49,6 @@ app.post('/profile-upload-multiple', upload.array('profile-files', 12), function
     for(var i=0;i<req.files.length;i++){
         response += `<img src="${req.files[i].path}" /><br>`
     }
-    
     return res.send(response)
 })
 
@@ -82,17 +83,16 @@ app.use(express.urlencoded({
 }));
 
 app.post("/", (req, res) => {
-  // console.log(req.body)
-  //------------------ (mongodb) ------------------//
+  //------ (Inserting data in mongodb schema) ------//
   var mongodata = new uschema({
     name: req.body.username,
     email: req.body.email,
     password: req.body.pass  
   });
+  //------ (Inserting data in mongodb schema) ------//
 
 
   //------------------ (JsonWebToken) ------------------//
-  // console.log('mongodata>>', mongodata._id)
   var token = jwt.sign({ id: mongodata._id }, process.env.SECRET_KEY);
   console.log('==>', token)
 
@@ -102,15 +102,15 @@ app.post("/", (req, res) => {
   //------------------ (JsonWebToken) ------------------//
 
 
-  //--------- (saving the jwt in cookies) ---------//
+  //--------- (Saving the jwt in cookies) ---------//
   res.cookie("jwt_cookie", token, {
     expires: new Date(Date.now() + 15000),
     httpOnly:true
   })
+  //--------- (Saving the jwt in cookies) ---------//
 
-  // console.log('cookies>>', req.cookies.jwt_cookie)
-  //--------- (saving the jwt in cookies) ---------//
 
+  //-------- (Saving data in mongodb) --------//
   mongodata.save(function(err,result){
     if (err){   
       // console.log(err);
@@ -121,18 +121,55 @@ app.post("/", (req, res) => {
       console.log("Data saved in database")
     }
   })
-  //------------------ (mongodb) ------------------//
+  //-------- (Saving data in mongodb) --------//
 
-  res.redirect("http://localhost:3000/up")
+  res.redirect("login")
 })
-
 //---------- (get data from HTML to node server) ----------//
 
 
 
 app.get('/up',auth,(req, res) => {
-  res.render("upload_pic")
+  res.render("upload_pic", { liud : logged_in_user_data })
 })
+
+
+app.get('/login',auth,(req, res) => {
+  res.render("login")
+  // res.redirect("up")
+})
+
+app.post('/login_auth', async(req, res) => {
+  const user_data_to_login = await uschema.findOne({email: req.body.emailid});  
+  if(user_data_to_login){
+    if(user_data_to_login.password == req.body.pass){
+      //------------------ (JsonWebToken) ------------------//
+      var login_token = jwt.sign({ id: user_data_to_login._id }, process.env.SECRET_KEY);
+      console.log('==>', login_token)
+
+      jwt.verify(login_token, process.env.SECRET_KEY, function(err, decoded) {
+        console.log('decoded>>',decoded.id)
+      });
+      //------------------ (JsonWebToken) ------------------//
+
+
+      //--------- (Saving the jwt in cookies) ---------//
+      res.cookie("jwt_cookie", login_token, {
+        expires: new Date(Date.now() + 1000*60*2),
+        httpOnly:true
+      })
+      //--------- (Saving the jwt in cookies) ---------//
+
+      logged_in_user_data = user_data_to_login; 
+      res.redirect("up")    
+    }else{
+      res.send({status:"error", msg:"Incorrect password!"})  
+    }
+  }else{
+    res.send({status:"error", msg:"User data missing!"})
+  }
+})
+
 
 
 
