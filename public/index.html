@@ -18,26 +18,26 @@
               <!-- <form enctype="multipart/form-data" action="/" method="post"> -->
               <form action="/" method="post" id="form">
                 <h2 class="text-center">SIGN UP</h2>
-                <div class="mb-3">
+                <div class="mb-4">
                   <input type="name" name="username" id="username" class="form-control" id="" placeholder="Name *" onkeypress="return (event.charCode > 64 && event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || (event.charCode==32)" required >
                   <span class="formerror" id="name_msg"></span>
                 </div>
-                <div class="mb-3">
-                  <input type="email" name="email" id="email" class="form-control" placeholder="Email *" onkeydown="validation()" required>
-                  <span class="formerror" id="email_msg"></span>
+                <div class="mb-4">
+                  <input type="email" name="email" id="email" class="form-control" placeholder="Email *" onkeydown="validation()" required >
+                  <small id="email_msg"></small>
                 </div>
-                <div class="mb-3">
+                <div class="mb-4">
                   <input type="password" name="pass" id="pass" class="form-control" id="" placeholder="Password *" required>
                   <i class="toggle-password fa fa-fw fa-eye-slash"></i>
                   <span id="password_msg"></span>
                 </div>
-                <div class="mb-3">
+                <div class="mb-4">
                   <input type="password" name="cpass" id="cpass" class="form-control" placeholder="Confirm Password *" required>
                   <span id="confirm_password_msg"></span>
                 </div>
                 
                 <div class="text-center">
-                  <button type="submit" class="btn btn-primary">Register</button>
+                  <button type="submit" id="register" class="btn btn-primary">Register</button>
                 </div>
               </form>
             </div>

@@ -2,8 +2,8 @@
 
 // Matching Password and Confirm_Password
 $(document).ready(function () {
-    $("#confirm_pass").bind("keyup change", function () {
-    passcheck($("#pass").val(), $("#confirm_pass").val());
+    $("#cpass").bind("keyup change", function () {
+    passcheck($("#pass").val(), $("#cpass").val());
   });
 })   
 
@@ -12,7 +12,7 @@ function passcheck(mypass, myconfirmpass){
     if(mypass!=myconfirmpass){
     $("#register").removeAttr("onclick");
     $("#confirm_password_msg").show();
-    $("#confirm_password_msg").html('<div class="text-danger">Password did not matched!</div>');
+    $("#confirm_password_msg").html('<small class="text-danger">Password did not matched!</small>');
     document.getElementById('register').disabled = true;
     }
 
@@ -23,19 +23,6 @@ function passcheck(mypass, myconfirmpass){
     document.getElementById('register').disabled = false;
     }
 }
-
-
-// only number will allow, text not allowed in Phone.
-$('input[name="Phone"]').keypress(function (event) {
-  if (event.keyCode == 46 || event.keyCode == 8) {
-    //do nothing
-  } 
-  else {
-    if (event.keyCode < 48 || event.keyCode > 57) {
-      event.preventDefault();
-    }
-  }
-});
 
 
 // Password pattern check on browser.
@@ -54,7 +41,7 @@ function check_Password(Pass, Con_Pass) {
 
   if(!re.test(Pass)){
   $("#password_msg").show();
-  $("#password_msg").html('<div class="text-danger">Must input 1 uppercase, 1 lowercase,1 number and 1 special characters (min: 8)!</div>');
+  $("#password_msg").html('<small class="text-danger">Must input 1 uppercase, 1 lowercase,1 number and 1 special characters (min: 8)!</small>');
   buttonControl()
   }
 
@@ -69,7 +56,7 @@ function check_Password(Pass, Con_Pass) {
 function validation() {
   let form = document.getElementById("form");
   let email = document.getElementById("email").value;
-  let text = document.getElementById("text");
+  let text = document.getElementById("email_msg");
   let pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
 
   if (!email.match(pattern) || email == "") {
